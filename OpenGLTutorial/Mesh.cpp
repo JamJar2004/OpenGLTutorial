@@ -1,6 +1,6 @@
 #include "Mesh.hpp"
 
-Mesh::Mesh(const std::vector<glm::vec3>& vertices)
+Mesh::Mesh(const std::vector<glm::vec3>& vertices) : m_vertexCount(vertices.size())
 {
     glGenVertexArrays(1, &m_vaoID);
     glBindVertexArray(m_vaoID);
@@ -22,5 +22,5 @@ Mesh::~Mesh()
 void Mesh::Draw()
 {
     glBindVertexArray(m_vaoID);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, m_vertexCount);
 }
