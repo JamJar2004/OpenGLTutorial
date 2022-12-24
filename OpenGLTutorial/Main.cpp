@@ -4,6 +4,7 @@
 
 #include "Window.hpp"
 #include "Mesh.hpp"
+#include "Shader.hpp"
 
 int main(int argc, char** argv)
 {
@@ -27,6 +28,11 @@ int main(int argc, char** argv)
         };
 
         Mesh mesh(vertices);
+
+        std::shared_ptr<Shader> shader = 
+            Shader::Load("Basic_VS.glsl", "Basic_FS.glsl");
+
+        shader->Bind();
 
         bool isClosed = false;
         while(!isClosed)
