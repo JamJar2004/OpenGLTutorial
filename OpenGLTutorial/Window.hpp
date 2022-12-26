@@ -13,5 +13,8 @@ public:
 
     ~Window();
 
+    uint32_t Width;
+    uint32_t Height;
+
     void SwapBuffers();
 };

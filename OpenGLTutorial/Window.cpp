@@ -1,6 +1,6 @@
 #include "Window.hpp"
 
-Window::Window(uint32_t width, uint32_t height, const std::string& title)
+Window::Window(uint32_t width, uint32_t height, const std::string& title) : Width(width), Height(height)
 {
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);

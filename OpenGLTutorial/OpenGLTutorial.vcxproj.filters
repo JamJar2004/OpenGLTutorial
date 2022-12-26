@@ -10,5 +10,7 @@
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Shader.hpp" />
+    <ClInclude Include="Transformation.hpp" />
+    <ClInclude Include="Camera.hpp" />
   </ItemGroup>
 </Project>

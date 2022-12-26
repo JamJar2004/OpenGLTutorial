@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 
 class Shader
 {
@@ -28,4 +29,6 @@ public:
 	~Shader();
 
 	void Bind();
+
+	void SetUniform(const std::string& name, const glm::mat4& value);
 };

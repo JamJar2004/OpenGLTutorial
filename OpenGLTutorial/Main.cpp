@@ -1,10 +1,13 @@
 #include <iostream>
+#include <chrono>
 
 #define GLEW_STATIC
 
 #include "Window.hpp"
 #include "Mesh.hpp"
 #include "Shader.hpp"
+#include "Transformation.hpp"
+#include "Camera.hpp"
 
 int main(int argc, char** argv)
 {
@@ -29,31 +32,74 @@ int main(int argc, char** argv)
 
         Mesh mesh(vertices);
 
+		Transformation transformation;
+
+		Camera camera(Transformation(glm::vec3(0, 0, 5)),
+			glm::perspective(glm::radians(70.0f), window.Width / float(window.Height), 0.1f, 1000.0f));
+
         std::shared_ptr<Shader> shader = 
             Shader::Load("Basic_VS.glsl", "Basic_FS.glsl");
 
         shader->Bind();
 
-        bool isClosed = false;
-        while(!isClosed)
-        {
-            SDL_Event e;
-            while(SDL_PollEvent(&e))
-            {
-                switch(e.type)
-                {
-                    case SDL_QUIT:
-                        isClosed = true;
-                        break;
-                }
-            }
+		float x = 0;
 
-            glClear(GL_COLOR_BUFFER_BIT);
+        const double frameTime = 1.0f / 60.0f;
 
-            mesh.Draw();
+		uint32_t fps = 0;
+		std::chrono::time_point lastTime = std::chrono::system_clock::now();
+		double fpsTimeCounter = 0;
+		double updateTimer = 1;
 
-            window.SwapBuffers();
-        }
+		bool isClosed = false;
+		while(!isClosed)
+		{
+			std::chrono::time_point currentTime = std::chrono::system_clock::now();
+			double passedTime = std::chrono::duration<double>(currentTime - lastTime).count();
+			lastTime = currentTime;
+
+			updateTimer    += passedTime;
+			fpsTimeCounter += passedTime;
+
+			bool shouldRender = false;
+			while(updateTimer >= frameTime)
+			{
+				shouldRender = true;
+
+				updateTimer -= frameTime;
+
+				SDL_Event e;
+				while(SDL_PollEvent(&e))
+				{
+					switch(e.type)
+					{
+						case SDL_QUIT:
+							isClosed = true;
+							break;
+					}
+				}
+
+				x += float(frameTime);
+				transformation.Position.x = sinf(x);
+				transformation.Rotation = glm::angleAxis(glm::radians(sinf(x) * 180.0f), glm::vec3(0, 1, 0));
+
+				if(fpsTimeCounter >= 1.0f)
+				{
+					std::cout << "FPS: " << fps << std::endl;
+					fpsTimeCounter = 0.0f;
+					fps = 0;
+				}
+			}
+
+			if(shouldRender)
+			{
+				glClear(GL_COLOR_BUFFER_BIT);
+				shader->SetUniform("u_WVP", camera.GetViewProjection() * transformation.ToMatrix());
+				mesh.Draw();
+				window.SwapBuffers();
+				fps++;
+			}
+		}
 
         SDL_Quit();
     }
