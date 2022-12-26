@@ -2,7 +2,9 @@
 
 out vec4 o_color;
 
+in vec3 v_position;
+
 void main()
 {
-	o_color = vec4(1.0, 0.0, 0.0, 1.0);
+	o_color = vec4(v_position, 1.0);
 }
