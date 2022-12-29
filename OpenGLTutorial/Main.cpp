@@ -21,16 +21,30 @@ int main(int argc, char** argv)
             return -1;
         }
 
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CW);
         glClearColor(0.5f, 0.0f, 1.0f, 1.0f);
 
-        std::vector<glm::vec3> vertices =
+        /*std::vector<glm::vec3> vertices =
         {
             glm::vec3(-1, -1, 0),
-            glm::vec3( 0,  1, 0),
-            glm::vec3( 1, -1, 0)
+            glm::vec3(-1,  1, 0),
+            glm::vec3( 1, -1, 0),
+			glm::vec3( 1,  1, 0)
         };
 
-        Mesh mesh(vertices);
+		std::vector<GLuint> indices =
+		{
+			0, 1, 3,
+			0, 3, 2
+		};
+
+        Mesh mesh(vertices, indices);*/
+
+		std::shared_ptr<Mesh> cube = Mesh::CreateCube();
 
 		Transformation transformation;
 
@@ -80,7 +94,7 @@ int main(int argc, char** argv)
 				}
 
 				x += float(frameTime);
-				transformation.Position.x = sinf(x);
+				//transformation.Position.x = sinf(x);
 				transformation.Rotation = glm::angleAxis(glm::radians(sinf(x) * 180.0f), glm::vec3(0, 1, 0));
 
 				if(fpsTimeCounter >= 1.0f)
@@ -93,9 +107,9 @@ int main(int argc, char** argv)
 
 			if(shouldRender)
 			{
-				glClear(GL_COLOR_BUFFER_BIT);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				shader->SetUniform("u_WVP", camera.GetViewProjection() * transformation.ToMatrix());
-				mesh.Draw();
+				cube->Draw();
 				window.SwapBuffers();
 				fps++;
 			}
