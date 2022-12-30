@@ -2,9 +2,11 @@
 
 out vec4 o_color;
 
-in vec3 v_position;
+in vec2 v_texCoord;
+
+uniform sampler2D u_texture;
 
 void main()
 {
-	o_color = vec4(v_position, 1.0);
+	o_color = texture(u_texture, v_texCoord * 2);
 }

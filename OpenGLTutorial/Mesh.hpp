@@ -5,6 +5,15 @@
 #include <vector>
 #include <memory>
 
+struct Vertex
+{
+    Vertex(const glm::vec3& position, const glm::vec2& texCoord) :
+        Position(position), TexCoord(texCoord) {}
+
+    glm::vec3 Position;
+    glm::vec2 TexCoord;
+};
+
 class Mesh
 {
 private:
@@ -16,7 +25,7 @@ private:
 public:
     static std::shared_ptr<Mesh> CreateCube();
 
-    Mesh(const std::vector<glm::vec3>& vertices, const std::vector<GLuint>& indices);
+    Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
     ~Mesh();
 
     void Draw();

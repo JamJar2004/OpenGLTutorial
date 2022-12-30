@@ -5,6 +5,7 @@
 
 #include "Window.hpp"
 #include "Mesh.hpp"
+#include "Texture.hpp"
 #include "Shader.hpp"
 #include "Transformation.hpp"
 #include "Camera.hpp"
@@ -22,18 +23,18 @@ int main(int argc, char** argv)
         }
 
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 
 		glCullFace(GL_BACK);
 		glFrontFace(GL_CW);
-        glClearColor(0.5f, 0.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        /*std::vector<glm::vec3> vertices =
+       /* std::vector<Vertex> vertices =
         {
-            glm::vec3(-1, -1, 0),
-            glm::vec3(-1,  1, 0),
-            glm::vec3( 1, -1, 0),
-			glm::vec3( 1,  1, 0)
+            Vertex(glm::vec3(-1, -1, 0), glm::vec2(0, 0)),
+            Vertex(glm::vec3(-1,  1, 0), glm::vec2(0, 1)),
+            Vertex(glm::vec3( 1, -1, 0), glm::vec2(1, 0)),
+			Vertex(glm::vec3( 1,  1, 0), glm::vec2(1, 1))
         };
 
 		std::vector<GLuint> indices =
@@ -43,6 +44,22 @@ int main(int argc, char** argv)
 		};
 
         Mesh mesh(vertices, indices);*/
+
+		std::shared_ptr<Texture> texture = Texture::Load("bricks.png");
+		texture->Bind(0);
+		/*constexpr size_t TEXTURE_SIZE = 64;
+		constexpr size_t SIZE_IN_BYTES = TEXTURE_SIZE * TEXTURE_SIZE * 4;
+		uint8_t pixels[SIZE_IN_BYTES] = {};
+		for(size_t i = 0; i < SIZE_IN_BYTES; i += 4)
+		{
+			pixels[i    ] = std::rand() % 255;
+			pixels[i + 1] = std::rand() % 255;
+			pixels[i + 2] = std::rand() % 255;
+			pixels[i + 3] = std::rand() % 255;
+		}
+
+		Texture texture(TEXTURE_SIZE, TEXTURE_SIZE, pixels, GL_RGBA8, GL_RGBA);
+		texture.Bind(0);*/
 
 		std::shared_ptr<Mesh> cube = Mesh::CreateCube();
 
@@ -55,6 +72,8 @@ int main(int argc, char** argv)
             Shader::Load("Basic_VS.glsl", "Basic_FS.glsl");
 
         shader->Bind();
+
+		shader->SetUniform("u_texture", 0);
 
 		float x = 0;
 
@@ -94,7 +113,7 @@ int main(int argc, char** argv)
 				}
 
 				x += float(frameTime);
-				//transformation.Position.x = sinf(x);
+				transformation.Position.x = sinf(x);
 				transformation.Rotation = glm::angleAxis(glm::radians(sinf(x) * 180.0f), glm::vec3(0, 1, 0));
 
 				if(fpsTimeCounter >= 1.0f)
@@ -110,6 +129,7 @@ int main(int argc, char** argv)
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				shader->SetUniform("u_WVP", camera.GetViewProjection() * transformation.ToMatrix());
 				cube->Draw();
+				//mesh.Draw();
 				window.SwapBuffers();
 				fps++;
 			}
