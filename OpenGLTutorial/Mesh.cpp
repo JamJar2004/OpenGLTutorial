@@ -42,8 +42,8 @@ std::shared_ptr<Mesh> Mesh::CreateCube()
 
 	size_t faceIndices[] =
 	{
-		0, 2, 3,
-		3, 1, 0,
+		0, 3, 2,
+		3, 0, 1,
 	};
 
 	std::vector<GLuint> indices(36);
