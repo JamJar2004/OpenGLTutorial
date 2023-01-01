@@ -9,6 +9,7 @@
 #include "Shader.hpp"
 #include "Transformation.hpp"
 #include "Camera.hpp"
+#include "Scene.hpp"
 
 int main(int argc, char** argv)
 {
@@ -29,53 +30,7 @@ int main(int argc, char** argv)
 		glFrontFace(GL_CW);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-       /* std::vector<Vertex> vertices =
-        {
-            Vertex(glm::vec3(-1, -1, 0), glm::vec2(0, 0)),
-            Vertex(glm::vec3(-1,  1, 0), glm::vec2(0, 1)),
-            Vertex(glm::vec3( 1, -1, 0), glm::vec2(1, 0)),
-			Vertex(glm::vec3( 1,  1, 0), glm::vec2(1, 1))
-        };
-
-		std::vector<GLuint> indices =
-		{
-			0, 1, 3,
-			0, 3, 2
-		};
-
-        Mesh mesh(vertices, indices);*/
-
-		std::shared_ptr<Texture> texture = Texture::Load("bricks.png");
-		texture->Bind(0);
-		/*constexpr size_t TEXTURE_SIZE = 64;
-		constexpr size_t SIZE_IN_BYTES = TEXTURE_SIZE * TEXTURE_SIZE * 4;
-		uint8_t pixels[SIZE_IN_BYTES] = {};
-		for(size_t i = 0; i < SIZE_IN_BYTES; i += 4)
-		{
-			pixels[i    ] = std::rand() % 255;
-			pixels[i + 1] = std::rand() % 255;
-			pixels[i + 2] = std::rand() % 255;
-			pixels[i + 3] = std::rand() % 255;
-		}
-
-		Texture texture(TEXTURE_SIZE, TEXTURE_SIZE, pixels, GL_RGBA8, GL_RGBA);
-		texture.Bind(0);*/
-
-		std::shared_ptr<Mesh> cube = Mesh::CreateCube();
-
-		Transformation transformation;
-
-		Camera camera(Transformation(glm::vec3(0, 0, 5)),
-			glm::perspective(glm::radians(70.0f), window.Width / float(window.Height), 0.1f, 1000.0f));
-
-        std::shared_ptr<Shader> shader = 
-            Shader::Load("Basic_VS.glsl", "Basic_FS.glsl");
-
-        shader->Bind();
-
-		shader->SetUniform("u_texture", 0);
-
-		float x = 0;
+		Scene scene(window);
 
         const double frameTime = 1.0f / 60.0f;
 
@@ -112,9 +67,7 @@ int main(int argc, char** argv)
 					}
 				}
 
-				x += float(frameTime);
-				transformation.Position.x = sinf(x);
-				transformation.Rotation = glm::angleAxis(glm::radians(sinf(x) * 180.0f), glm::vec3(0, 1, 0));
+				scene.Update(frameTime);
 
 				if(fpsTimeCounter >= 1.0f)
 				{
@@ -126,10 +79,7 @@ int main(int argc, char** argv)
 
 			if(shouldRender)
 			{
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				shader->SetUniform("u_WVP", camera.GetViewProjection() * transformation.ToMatrix());
-				cube->Draw();
-				//mesh.Draw();
+				scene.Render(window);
 				window.SwapBuffers();
 				fps++;
 			}
