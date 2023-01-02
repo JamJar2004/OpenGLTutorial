@@ -4,14 +4,16 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
+#include <string>
 
 struct Vertex
 {
-    Vertex(const glm::vec3& position, const glm::vec2& texCoord) :
-        Position(position), TexCoord(texCoord) {}
+    Vertex(const glm::vec3& position, const glm::vec2& texCoord, const glm::vec3& normal) :
+        Position(position), TexCoord(texCoord), Normal(normal) {}
 
     glm::vec3 Position;
     glm::vec2 TexCoord;
+    glm::vec3 Normal;
 };
 
 class Mesh
@@ -24,6 +26,8 @@ private:
     size_t m_indexCount;
 public:
     static std::shared_ptr<Mesh> CreateCube();
+    static std::shared_ptr<Mesh> LoadTerrain(const std::string& fileName);
+    static std::shared_ptr<Mesh> Load(const std::string& fileName);
 
     Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
     ~Mesh();

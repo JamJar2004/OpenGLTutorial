@@ -15,7 +15,7 @@ public:
 	std::shared_ptr<Mesh>     Mesh;
 	std::shared_ptr<Material> Material;
 
-	void Render(const glm::mat4& viewProjection, bool renderInside = false)
+	void Render(const glm::mat4& viewProjection, const glm::vec3& ambientLight, const glm::vec3& lightDirection, bool renderInside = false)
 	{
 		if(renderInside)
 			glCullFace(GL_FRONT);
@@ -24,7 +24,12 @@ public:
 
 		std::shared_ptr<Shader> shader = Material->Shader;
 		shader->Bind();
-		shader->SetUniform("u_WVP", viewProjection * Transformation.ToMatrix());
+
+		glm::mat4 worldMatrix = Transformation.ToMatrix();
+		shader->SetUniform("u_world", worldMatrix);
+		shader->SetUniform("u_WVP", viewProjection * worldMatrix);
+		shader->SetUniform("u_ambientLight", ambientLight);
+		shader->SetUniform("u_lightDirection", lightDirection);
 		Material->UpdateUniforms();
 		Mesh->Draw();
 	}

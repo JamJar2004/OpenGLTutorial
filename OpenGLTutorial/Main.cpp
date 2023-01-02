@@ -17,6 +17,9 @@ int main(int argc, char** argv)
     {
         Window window(800, 600, "Test");
 
+		MouseDevice mouse(&window);
+		KeyboardDevice keyboard;
+
         if(glewInit() != GLEW_OK)
         {
             std::cout << "Error: Glew failed to initialize." << std::endl;
@@ -65,9 +68,12 @@ int main(int argc, char** argv)
 							isClosed = true;
 							break;
 					}
+
+					keyboard.Update(e);
+					mouse.Update(e);
 				}
 
-				scene.Update(frameTime);
+				scene.Update(frameTime, keyboard, mouse);
 
 				if(fpsTimeCounter >= 1.0f)
 				{

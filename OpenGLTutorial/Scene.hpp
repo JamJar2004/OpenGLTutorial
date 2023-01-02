@@ -6,6 +6,8 @@
 #include "Shader.hpp"
 #include "Texture.hpp"
 #include "Entity.hpp"
+#include "KeyboardDevice.hpp"
+#include "MouseDevice.hpp"
 
 #include <memory>
 
@@ -13,8 +15,12 @@ class Scene
 {
 private:
 	std::vector<std::shared_ptr<Entity>> entities;
+	std::vector<std::shared_ptr<Entity>> monkeys;
 
 	Camera camera;
+
+	glm::vec3 ambientLight;
+	glm::vec3 lightDirection;
 
 	float x;
 
@@ -31,7 +37,7 @@ private:
 public:
 	Scene(const Window& window);
 
-	void Update(float delta);
+	void Update(float delta, KeyboardDevice& keyboard, MouseDevice& mouse);
 
 	void Render(Window& window);
 };

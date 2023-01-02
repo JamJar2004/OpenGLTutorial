@@ -17,4 +17,6 @@ public:
     uint32_t Height;
 
     void SwapBuffers();
+
+    friend class MouseDevice;
 };

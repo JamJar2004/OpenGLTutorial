@@ -15,18 +15,20 @@ public:
 	virtual void UpdateUniforms() = 0;
 };
 
-class BasicMaterial : public Material
+class DiffuseMaterial : public Material
 {
 public:
-	BasicMaterial(std::shared_ptr<Texture> texture) :
-		Material(Shader::Load("Basic_VS.glsl", "Basic_FS.glsl")),
-		Texture(texture) {}
+	DiffuseMaterial(std::shared_ptr<Texture> texture, const glm::vec3& color = glm::vec3(1)) :
+		Material(Shader::Load("Diffuse_VS.glsl", "Diffuse_FS.glsl")),
+		Texture(texture), Color(color) {}
 
 	std::shared_ptr<Texture> Texture;
+	glm::vec3 Color;
 
 	virtual void UpdateUniforms() override
 	{
 		Texture->Bind(0);
 		Shader->SetUniform("u_texture", 0);
+		Shader->SetUniform("u_color", Color);
 	}
 };
