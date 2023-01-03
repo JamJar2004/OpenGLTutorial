@@ -11,7 +11,6 @@ Scene::Scene(const Window& window) :
 	lightDirection(glm::vec3(1, -1, -1)),
 	ambientLight(glm::vec3(0.2f))
 {
-	std::shared_ptr<Mesh> cube = Mesh::CreateCube();
 	std::shared_ptr<Material> material1 = std::make_shared<DiffuseMaterial>(Texture::Load("bricks.png"));
 	std::shared_ptr<Material> material2 = std::make_shared<DiffuseMaterial>(Texture::Load("blank.png"), glm::vec3(0.5f, 0.0f, 1.0f));
 

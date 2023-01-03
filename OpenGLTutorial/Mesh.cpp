@@ -17,9 +17,9 @@ void CalcNormals(std::vector<Vertex>& vertices, const std::vector<GLuint>& indic
 
 		glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
 
-		vertices[i0].Normal += normal;
-		vertices[i1].Normal += normal;
-		vertices[i2].Normal += normal;
+		vertices[i0].Normal -= normal;
+		vertices[i1].Normal -= normal;
+		vertices[i2].Normal -= normal;
 	}
 
 	for(size_t i = 0; i < vertices.size(); i++)
@@ -66,7 +66,7 @@ std::shared_ptr<Mesh> Mesh::CreateCube()
 		Vertex(glm::vec3( 1,  1, 1), tl, glm::vec3(0, 0, 1))
 	};
 
-	size_t faceIndices[] =
+	GLuint faceIndices[] =
 	{
 		0, 3, 2,
 		3, 0, 1,
@@ -104,7 +104,7 @@ std::shared_ptr<Mesh> Mesh::LoadTerrain(const std::string& fileName)
 
 			float heightValue = pixelData[index] / 255.0f;
 
-			vertices.emplace_back(glm::vec3(u * 2 - 1, (heightValue * 2 - 1), v * 2 - 1), glm::vec2(u, v), glm::vec3(0));
+			vertices.emplace_back(glm::vec3(u * 2 - 1, heightValue * 2 - 1, v * 2 - 1), glm::vec2(u, v), glm::vec3(0));
 		}
 	}
 
@@ -117,7 +117,6 @@ std::shared_ptr<Mesh> Mesh::LoadTerrain(const std::string& fileName)
 			GLuint index = z * width + x;
 
 			indices.push_back(index);
-			
 			indices.push_back(index + 1);
 			indices.push_back(index + width);
 
@@ -125,7 +124,6 @@ std::shared_ptr<Mesh> Mesh::LoadTerrain(const std::string& fileName)
 			indices.push_back(index + width + 1);
 			indices.push_back(index + width);
 			
-				
 		}
 	}
 
@@ -142,14 +140,14 @@ std::shared_ptr<Mesh> Mesh::Load(const std::string& fileName)
 
     std::vector<Vertex> vertices;
 
-    for (size_t i = 0; i < indexedModel.positions.size(); i++)
+    for(size_t i = 0; i < indexedModel.positions.size(); i++)
     {
         Vertex vertex(indexedModel.positions[i], indexedModel.texCoords[i], indexedModel.normals[i]);
         vertices.push_back(vertex);
     }
 
     std::vector<GLuint> indices;
-    for (GLuint index : indexedModel.indices)
+    for(GLuint index : indexedModel.indices)
         indices.push_back(index);
 
     //		CalcTangents(vertices, indices);

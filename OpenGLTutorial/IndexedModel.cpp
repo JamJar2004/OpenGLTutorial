@@ -59,18 +59,18 @@ void IndexedModel::CalcNormals()
 {
     for(size_t i = 0; i < indices.size(); i += 3)
     {
-        int i0 = indices[i    ];
-        int i1 = indices[i + 1];
-        int i2 = indices[i + 2];
+        size_t i0 = indices[i    ];
+        size_t i1 = indices[i + 1];
+        size_t i2 = indices[i + 2];
 
         glm::vec3 v1 = positions[i1] - positions[i0];
         glm::vec3 v2 = positions[i2] - positions[i0];
         
         glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
             
-        normals[i0] += normal;
-        normals[i1] += normal;
-        normals[i2] += normal;
+        normals[i0] -= normal;
+        normals[i1] -= normal;
+        normals[i2] -= normal;
     }
     
     for(size_t i = 0; i < positions.size(); i++)
@@ -172,9 +172,9 @@ unsigned int OBJModel::FindLastVertexIndex(const std::vector<OBJIndex*>& indexLo
         
         if(testIndex->vertexIndex == currentIndex->vertexIndex)
         {
-            unsigned int countStart = current;
+            uint32_t countStart = current;
         
-            for(unsigned int i = 0; i < current; i++)
+            for(size_t i = 0; i < current; i++)
             {
                 OBJIndex* possibleIndex = indexLookup[current - i];
                 
@@ -187,7 +187,7 @@ unsigned int OBJModel::FindLastVertexIndex(const std::vector<OBJIndex*>& indexLo
                 countStart--;
             }
             
-            for(unsigned int i = countStart; i < indexLookup.size() - countStart; i++)
+            for(size_t i = countStart; i < indexLookup.size() - countStart; i++)
             {
                 OBJIndex* possibleIndex = indexLookup[current + i];
                 
@@ -206,14 +206,14 @@ unsigned int OBJModel::FindLastVertexIndex(const std::vector<OBJIndex*>& indexLo
                     if(hasUVs)
                         currentTexCoord = uvs[currentIndex->uvIndex];
                     else
-                        currentTexCoord = glm::vec2(0,0);
+                        currentTexCoord = glm::vec2(0, 0);
                         
                     if(hasNormals)
                         currentNormal = normals[currentIndex->normalIndex];
                     else
-                        currentNormal = glm::vec3(0,0,0);
+                        currentNormal = glm::vec3(0, 0, 0);
                     
-                    for(unsigned int j = 0; j < result.positions.size(); j++)
+                    for(size_t j = 0; j < result.positions.size(); j++)
                     {
                         if(currentPosition == result.positions[j] 
                             && ((!hasUVs || currentTexCoord == result.texCoords[j])
@@ -247,14 +247,14 @@ void OBJModel::CreateOBJFace(const std::string& line)
     std::vector<std::string> tokens = SplitString(line, ' ');
 
     this->OBJIndices.push_back(ParseOBJIndex(tokens[1], &this->hasUVs, &this->hasNormals));
-    this->OBJIndices.push_back(ParseOBJIndex(tokens[3], &this->hasUVs, &this->hasNormals));
     this->OBJIndices.push_back(ParseOBJIndex(tokens[2], &this->hasUVs, &this->hasNormals));
+    this->OBJIndices.push_back(ParseOBJIndex(tokens[3], &this->hasUVs, &this->hasNormals));
 
     if((int)tokens.size() > 4)
     {
         this->OBJIndices.push_back(ParseOBJIndex(tokens[1], &this->hasUVs, &this->hasNormals));
-        this->OBJIndices.push_back(ParseOBJIndex(tokens[4], &this->hasUVs, &this->hasNormals));
         this->OBJIndices.push_back(ParseOBJIndex(tokens[3], &this->hasUVs, &this->hasNormals));
+        this->OBJIndices.push_back(ParseOBJIndex(tokens[4], &this->hasUVs, &this->hasNormals));
     }
 }
 
@@ -294,19 +294,20 @@ OBJIndex OBJModel::ParseOBJIndex(const std::string& token, bool* hasUVs, bool* h
 
 glm::vec3 OBJModel::ParseOBJVec3(const std::string& line) 
 {
-    unsigned int tokenLength = line.length();
+    size_t tokenLength = line.length();
     const char* tokenString = line.c_str();
     
-    unsigned int vertIndexStart = 2;
+    size_t vertIndexStart = 2;
     
     while(vertIndexStart < tokenLength)
     {
         if(tokenString[vertIndexStart] != ' ')
             break;
+
         vertIndexStart++;
     }
     
-    unsigned int vertIndexEnd = FindNextChar(vertIndexStart, tokenString, tokenLength, ' ');
+    size_t vertIndexEnd = FindNextChar(vertIndexStart, tokenString, tokenLength, ' ');
     
     float x = ParseOBJFloatValue(line, vertIndexStart, vertIndexEnd);
     
@@ -320,9 +321,7 @@ glm::vec3 OBJModel::ParseOBJVec3(const std::string& line)
     
     float z = ParseOBJFloatValue(line, vertIndexStart, vertIndexEnd);
     
-    return glm::vec3(x,y,z);
-
-    //glm::vec3(atof(tokens[1].c_str()), atof(tokens[2].c_str()), atof(tokens[3].c_str()))
+    return glm::vec3(x, y, -z);
 }
 
 glm::vec2 OBJModel::ParseOBJVec2(const std::string& line)

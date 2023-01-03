@@ -8,12 +8,12 @@ in vec3 v_normal;
 uniform vec3 u_ambientLight;
 uniform vec3 u_lightDirection;
 
-uniform vec3 u_color;
 uniform sampler2D u_texture;
+uniform vec3 u_color;
 
 float CalcLight(vec3 lightDirection, vec3 surfaceNormal)
 {
-	float result = dot(normalize(lightDirection), surfaceNormal);
+	float result = dot(normalize(-lightDirection), surfaceNormal);
 	if(result < 0)
 		return 0.0;
 	
