@@ -77,6 +77,34 @@ void IndexedModel::CalcNormals()
         normals[i] = glm::normalize(normals[i]);
 }
 
+void IndexedModel::CalcTangents()
+{
+	for(size_t i = 0; i < indices.size(); i += 3)
+	{
+        size_t i0 = indices[i    ];
+        size_t i1 = indices[i + 1];
+        size_t i2 = indices[i + 2];
+
+		glm::vec3 edge1 = positions[i1] - positions[i0];
+		glm::vec3 edge2 = positions[i2] - positions[i0];
+
+		glm::vec2 delta1 = texCoords[i1] - texCoords[i0];
+		glm::vec2 delta2 = texCoords[i2] - texCoords[i0];
+
+		float dividend = (delta1.x * delta2.y - delta2.x * delta1.y);
+		float f = 1.0f / dividend;
+
+		glm::vec3 tangent(0, 0, 0);
+		tangent.x = f * (delta2.y * edge1.x - delta1.y * edge2.x);
+		tangent.y = f * (delta2.y * edge1.y - delta1.y * edge2.y);
+		tangent.z = f * (delta2.y * edge1.z - delta1.y * edge2.z);
+
+		tangents[i0] += tangent;
+        tangents[i1] += tangent;
+        tangents[i2] += tangent;
+	}
+}
+
 IndexedModel OBJModel::ToIndexedModel()
 {
     IndexedModel result;
@@ -86,13 +114,13 @@ IndexedModel OBJModel::ToIndexedModel()
     
     std::vector<OBJIndex*> indexLookup;
     
-    for(unsigned int i = 0; i < numIndices; i++)
+    for(size_t i = 0; i < numIndices; i++)
         indexLookup.push_back(&OBJIndices[i]);
     
     std::sort(indexLookup.begin(), indexLookup.end(), CompareOBJIndexPtr);
     
-    std::map<OBJIndex, unsigned int> normalModelIndexMap;
-    std::map<unsigned int, unsigned int> indexMap;
+    std::map<OBJIndex, size_t> normalModelIndexMap;
+    std::map<size_t, size_t> indexMap;
     
     for(unsigned int i = 0; i < numIndices; i++)
     {
@@ -105,18 +133,18 @@ IndexedModel OBJModel::ToIndexedModel()
         if(hasUVs)
             currentTexCoord = uvs[currentIndex->uvIndex];
         else
-            currentTexCoord = glm::vec2(0,0);
+            currentTexCoord = glm::vec2(0, 0);
             
         if(hasNormals)
             currentNormal = normals[currentIndex->normalIndex];
         else
-            currentNormal = glm::vec3(0,0,0);
+            currentNormal = glm::vec3(0, 0, 0);
         
         uint32_t normalModelIndex;
         uint32_t resultModelIndex;
         
         //Create model to properly generate normals on
-        std::map<OBJIndex, uint32_t>::iterator it = normalModelIndexMap.find(*currentIndex);
+        std::map<OBJIndex, size_t>::iterator it = normalModelIndexMap.find(*currentIndex);
         if(it == normalModelIndexMap.end())
         {
             normalModelIndex = uint32_t(normalModel.positions.size());
@@ -125,6 +153,7 @@ IndexedModel OBJModel::ToIndexedModel()
             normalModel.positions.push_back(currentPosition);
             normalModel.texCoords.push_back(currentTexCoord);
             normalModel.normals.push_back(currentNormal);
+            normalModel.tangents.push_back(glm::vec3());
         }
         else
             normalModelIndex = it->second;
@@ -139,23 +168,29 @@ IndexedModel OBJModel::ToIndexedModel()
             result.positions.push_back(currentPosition);
             result.texCoords.push_back(currentTexCoord);
             result.normals.push_back(currentNormal);
+            result.tangents.push_back(glm::vec3());
         }
         else
             resultModelIndex = previousVertexLocation;
         
         normalModel.indices.push_back(normalModelIndex);
         result.indices.push_back(resultModelIndex);
-        indexMap.insert(std::pair<unsigned int, unsigned int>(resultModelIndex, normalModelIndex));
+        indexMap.insert(std::pair<size_t, size_t>(resultModelIndex, normalModelIndex));
     }
     
     if(!hasNormals)
     {
         normalModel.CalcNormals();
         
-        for(unsigned int i = 0; i < result.positions.size(); i++)
+        for(size_t i = 0; i < result.positions.size(); i++)
             result.normals[i] = normalModel.normals[indexMap[i]];
     }
     
+    normalModel.CalcTangents();
+
+    for(size_t i = 0; i < result.positions.size(); i++)
+        result.tangents[i] = normalModel.tangents[indexMap[i]];
+
     return result;
 };
 

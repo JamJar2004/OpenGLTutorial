@@ -26,6 +26,34 @@ void CalcNormals(std::vector<Vertex>& vertices, const std::vector<GLuint>& indic
 		vertices[i].Normal = glm::normalize(vertices[i].Normal);
 }
 
+void CalcTangents(std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
+{
+	for(size_t i = 0; i < indices.size(); i += 3)
+	{
+		GLuint i0 = indices[i    ];
+		GLuint i1 = indices[i + 1];
+		GLuint i2 = indices[i + 2];
+
+		glm::vec3 edge1 = vertices[i1].Position - vertices[i0].Position;
+		glm::vec3 edge2 = vertices[i2].Position - vertices[i0].Position;
+
+		glm::vec2 delta1 = vertices[i1].TexCoord - vertices[i0].TexCoord;
+		glm::vec2 delta2 = vertices[i2].TexCoord - vertices[i0].TexCoord;
+
+		float dividend = (delta1.x * delta2.y - delta2.x * delta1.y);
+		float f = 1.0f / dividend;
+
+		glm::vec3 tangent(0, 0, 0);
+		tangent.x = f * (delta2.y * edge1.x - delta1.y * edge2.x);
+		tangent.y = f * (delta2.y * edge1.y - delta1.y * edge2.y);
+		tangent.z = f * (delta2.y * edge1.z - delta1.y * edge2.z);
+
+		vertices[i0].Tangent += tangent;
+		vertices[i1].Tangent += tangent;
+		vertices[i2].Tangent += tangent;
+	}
+}
+
 std::shared_ptr<Mesh> Mesh::CreateCube()
 {
 	glm::vec2 bl(0, 0);
@@ -80,6 +108,8 @@ std::shared_ptr<Mesh> Mesh::CreateCube()
 			indices.push_back(faceIndices[j] + i * 4);
 	}
 
+	CalcTangents(vertices, indices);
+
 	return std::make_shared<Mesh>(vertices, indices);
 }
 
@@ -128,7 +158,8 @@ std::shared_ptr<Mesh> Mesh::LoadTerrain(const std::string& fileName)
 	}
 
 	CalcNormals(vertices, indices);
-	
+	CalcTangents(vertices, indices);
+
 	return std::make_shared<Mesh>(vertices, indices);
 }
 
@@ -150,7 +181,7 @@ std::shared_ptr<Mesh> Mesh::Load(const std::string& fileName)
     for(GLuint index : indexedModel.indices)
         indices.push_back(index);
 
-    //		CalcTangents(vertices, indices);
+    CalcTangents(vertices, indices);
 
     return std::make_shared<Mesh>(vertices, indices);
 }
@@ -171,9 +202,11 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indic
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoord));
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
 }
 
 Mesh::~Mesh()

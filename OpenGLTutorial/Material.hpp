@@ -18,17 +18,23 @@ public:
 class DiffuseMaterial : public Material
 {
 public:
-	DiffuseMaterial(std::shared_ptr<Texture> texture, const glm::vec3& color = glm::vec3(1)) :
+	DiffuseMaterial(std::shared_ptr<Texture> texture, std::shared_ptr<Texture> normalMap, const glm::vec3& color = glm::vec3(1), const glm::vec2& tilingFactor = glm::vec2(1)) :
 		Material(Shader::Load("Diffuse_VS.glsl", "Diffuse_FS.glsl")),
-		Texture(texture), Color(color) {}
+		Diffuse(texture), NormalMap(normalMap), Color(color), TilingFactor(tilingFactor) {}
 
-	std::shared_ptr<Texture> Texture;
+	std::shared_ptr<Texture> Diffuse;
+	std::shared_ptr<Texture> NormalMap;
 	glm::vec3 Color;
+	glm::vec2 TilingFactor;
 
 	virtual void UpdateUniforms() override
 	{
-		Texture->Bind(0);
+		Diffuse->Bind(0);
+		NormalMap->Bind(1);
+
 		Shader->SetUniform("u_texture", 0);
+		Shader->SetUniform("u_normalMap", 1);
 		Shader->SetUniform("u_color", Color);
+		Shader->SetUniform("u_tilingFactor", TilingFactor);
 	}
 };

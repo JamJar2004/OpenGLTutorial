@@ -8,12 +8,13 @@
 
 struct Vertex
 {
-    Vertex(const glm::vec3& position, const glm::vec2& texCoord, const glm::vec3& normal) :
-        Position(position), TexCoord(texCoord), Normal(normal) {}
+    Vertex(const glm::vec3& position, const glm::vec2& texCoord, const glm::vec3& normal, const glm::vec3& tangent = glm::vec3(0)) :
+        Position(position), TexCoord(texCoord), Normal(normal), Tangent(tangent) {}
 
     glm::vec3 Position;
     glm::vec2 TexCoord;
     glm::vec3 Normal;
+    glm::vec3 Tangent;
 };
 
 class Mesh

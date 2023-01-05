@@ -31,6 +31,7 @@ public:
 	void Bind();
 
 	void SetUniform(const std::string& name, int value);
+	void SetUniform(const std::string& name, const glm::vec2& value);
 	void SetUniform(const std::string& name, const glm::vec3& value);
 	void SetUniform(const std::string& name, const glm::mat4& value);
 };

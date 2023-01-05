@@ -11,8 +11,8 @@ Scene::Scene(const Window& window) :
 	lightDirection(glm::vec3(1, -1, -1)),
 	ambientLight(glm::vec3(0.2f))
 {
-	std::shared_ptr<Material> material1 = std::make_shared<DiffuseMaterial>(Texture::Load("bricks.png"));
-	std::shared_ptr<Material> material2 = std::make_shared<DiffuseMaterial>(Texture::Load("blank.png"), glm::vec3(0.5f, 0.0f, 1.0f));
+	std::shared_ptr<Material> material1 = std::make_shared<DiffuseMaterial>(Texture::Load("bricks.png"), Texture::Load("bricks normal.png"), glm::vec3(1), glm::vec2(20));
+	std::shared_ptr<Material> material2 = std::make_shared<DiffuseMaterial>(Texture::Load("blank.png"), Texture::Load("blank normal.png"), glm::vec3(0.5f, 0.0f, 1.0f));
 
 	float terrainSize = 20;
 	CreateEntity(Transformation(glm::vec3(), glm::quat(1, 0, 0, 0), glm::vec3(terrainSize)), Mesh::LoadTerrain("heightMap.png"), material1);
