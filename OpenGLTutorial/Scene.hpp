@@ -17,6 +17,8 @@ private:
 	std::vector<std::shared_ptr<Entity>> entities;
 	std::vector<std::shared_ptr<Entity>> monkeys;
 
+	std::shared_ptr<Entity> skybox;
+
 	Camera camera;
 
 	glm::vec3 ambientLight;

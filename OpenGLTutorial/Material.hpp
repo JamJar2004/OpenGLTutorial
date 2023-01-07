@@ -38,3 +38,19 @@ public:
 		Shader->SetUniform("u_tilingFactor", TilingFactor);
 	}
 };
+
+class SkyboxMaterial : public Material
+{
+public:
+	SkyboxMaterial(std::shared_ptr<Texture> cubeMap) :
+		Material(Shader::Load("Skybox_VS.glsl", "Skybox_FS.glsl")),
+		CubeMap(cubeMap) {}
+
+	std::shared_ptr<Texture> CubeMap;
+
+	virtual void UpdateUniforms() override
+	{
+		CubeMap->Bind(0);
+		Shader->SetUniform("u_cubeMap", 0);
+	}
+};

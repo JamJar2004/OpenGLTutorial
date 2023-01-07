@@ -24,6 +24,13 @@ Scene::Scene(const Window& window) :
 		float x = (i / float(MONKEY_COUNT)) * 2.0f - 1.0f;
 		monkeys.push_back(CreateEntity(Transformation(glm::vec3(x * terrainSize, 5, sinf(i) * 5)), monkeyMesh, material2));
 	}
+
+	std::shared_ptr<Texture> cubeMap = Texture::LoadCubeMap("left.png", "right.png", "bottom.png", "top.png", "back.png", "front.png");
+	std::shared_ptr<Mesh> cube = Mesh::CreateCube();
+	std::shared_ptr<Material> skyMaterial = std::make_shared<SkyboxMaterial>(cubeMap);
+	
+	skybox = std::make_shared<Entity>(Transformation(glm::vec3(), glm::angleAxis(glm::radians(180.0f), glm::vec3(0, 1, 0)), glm::vec3(100)), cube, skyMaterial);
+	//CreateEntity(Transformation(), cube, skyMaterial);
 }
 
 const float MOUSE_SENSITIVITY = 0.5;
@@ -57,6 +64,8 @@ void Scene::Update(float delta, KeyboardDevice& keyboard, MouseDevice& mouse)
 
 	if(keyboard.IsKeyDown(SDL_SCANCODE_S))
 		camera.Transformation.Position += 10.0f * glm::rotate(camera.Transformation.Rotation, glm::vec3(0, 0, 1)) * delta;
+
+	skybox->Transformation.Position = camera.Transformation.Position;
 }
 
 void Scene::Render(Window& window)
@@ -65,5 +74,7 @@ void Scene::Render(Window& window)
 	glm::mat4 viewProjection = camera.GetViewProjection();
 	for(std::shared_ptr<Entity> entity : entities)
 		entity->Render(viewProjection, ambientLight, lightDirection);
+
+	skybox->Render(viewProjection, ambientLight, lightDirection, true);
 }
 
