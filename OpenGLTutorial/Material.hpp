@@ -54,3 +54,25 @@ public:
 		Shader->SetUniform("u_cubeMap", 0);
 	}
 };
+
+class WaterMaterial : public Material
+{
+public:
+	WaterMaterial(std::shared_ptr<Texture> reflection,
+				  std::shared_ptr<Texture> refraction) :
+		Material(Shader::Load("Water_VS.glsl", "Water_FS.glsl")),
+		Reflection(reflection),
+		Refraction(refraction) {}
+
+	std::shared_ptr<Texture> Reflection;
+	std::shared_ptr<Texture> Refraction;
+
+	virtual void UpdateUniforms() override
+	{
+		Reflection->Bind(0);
+		Refraction->Bind(1);
+
+		Shader->SetUniform("u_reflection", 0);
+		Shader->SetUniform("u_refraction", 1);
+	}
+};

@@ -27,6 +27,7 @@ private:
     size_t m_indexCount;
 public:
     static std::shared_ptr<Mesh> CreateCube();
+    static std::shared_ptr<Mesh> CreateQuad();
     static std::shared_ptr<Mesh> LoadTerrain(const std::string& fileName);
     static std::shared_ptr<Mesh> Load(const std::string& fileName);
 

@@ -1,5 +1,7 @@
 #include "Window.hpp"
 
+#include <GL/glew.h>
+
 Window::Window(uint32_t width, uint32_t height, const std::string& title) : Width(width), Height(height)
 {
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -24,4 +26,10 @@ Window::~Window()
 void Window::SwapBuffers()
 {
     SDL_GL_SwapWindow(m_window);
+}
+
+void Window::BindFrameBuffer()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, Width, Height);
 }

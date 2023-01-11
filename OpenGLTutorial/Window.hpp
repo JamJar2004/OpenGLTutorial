@@ -18,5 +18,7 @@ public:
 
     void SwapBuffers();
 
+    void BindFrameBuffer();
+
     friend class MouseDevice;
 };

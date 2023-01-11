@@ -11,8 +11,14 @@ out mat3 v_tbnMatrix;
 uniform mat4 u_world;
 uniform mat4 u_WVP;
 
+uniform vec4 u_clippingPlane;
+
 void main()
 {
+	vec4 worldPosition = u_world * vec4(a_position, 1.0);
+	
+	gl_ClipDistance[0] = dot(u_clippingPlane, worldPosition);
+
 	gl_Position = u_WVP * vec4(a_position, 1.0);
 	v_texCoord = a_texCoord;
 	

@@ -49,4 +49,6 @@ public:
 	const uint32_t Height;
 
 	void Bind(uint32_t slot);
+
+	friend class FrameBuffer;
 };

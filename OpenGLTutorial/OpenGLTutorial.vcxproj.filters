@@ -12,6 +12,7 @@
     <ClCompile Include="KeyboardDevice.cpp" />
     <ClCompile Include="MouseDevice.cpp" />
     <ClCompile Include="IndexedModel.cpp" />
+    <ClCompile Include="FrameBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Mesh.hpp" />
@@ -26,5 +27,6 @@
     <ClInclude Include="KeyboardDevice.hpp" />
     <ClInclude Include="MouseDevice.hpp" />
     <ClInclude Include="IndexedModel.hpp" />
+    <ClInclude Include="FrameBuffer.hpp" />
   </ItemGroup>
 </Project>
