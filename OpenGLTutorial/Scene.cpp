@@ -7,7 +7,6 @@ float randf()
 
 Scene::Scene(const Window& window) :
 	mainCamera(Transformation(glm::vec3(0, 2, 0)), glm::perspective(glm::radians(70.0f), window.Width / float(window.Height), 0.1f, 1000.0f)),
-	x(0),
 	lightDirection(glm::vec3(1, -1, -1)),
 	ambientLight(glm::vec3(0.2f))
 {
@@ -36,7 +35,8 @@ Scene::Scene(const Window& window) :
 	
 	std::shared_ptr<Mesh> quad = Mesh::CreateQuad();
 
-	std::shared_ptr<Material> waterMaterial = std::make_shared<WaterMaterial>(reflectionFrame->GetColorAttachment(), refractionFrame->GetColorAttachment());
+	std::shared_ptr<WaterMaterial> waterMaterial = std::make_shared<WaterMaterial>(reflectionFrame->GetColorAttachment(), refractionFrame->GetColorAttachment(), refractionFrame->GetDepthAttachment(), Texture::Load("dudvMap.png"), Texture::Load("normalMap.png"), glm::vec2(4));
+	waterOffset = &waterMaterial->Offset;
 	water = std::make_shared<Entity>(Transformation(glm::vec3(0, -4, 0), glm::quat(1, 0, 0, 0), glm::vec3(terrainSize)), quad, waterMaterial);
 }
 
@@ -47,7 +47,8 @@ void Scene::Update(float delta, KeyboardDevice& keyboard, MouseDevice& mouse)
 	for(size_t i = 0; i < monkeys.size(); i++)
 		monkeys[i]->Transformation.Rotate(glm::angleAxis(delta, glm::vec3(0, 1, 0)));
 
-	x += delta;
+	*waterOffset += delta * 0.04f;
+	*waterOffset = fmodf(*waterOffset, 1.0f);
 
 	if(mouse.IsButtonDown(LEFT))
 	{
@@ -80,9 +81,9 @@ void Scene::RenderEntities(Camera& camera, bool clipping, const glm::vec4& clipp
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glm::mat4 viewProjection = camera.GetViewProjection();
 	for(std::shared_ptr<Entity> entity : entities)
-		entity->Render(viewProjection, ambientLight, lightDirection, false, clipping, clippingPlane);
+		entity->Render(viewProjection, ambientLight, lightDirection, camera.Transformation.Position, false, clipping, clippingPlane);
 
-	skybox->Render(viewProjection, ambientLight, lightDirection, true);
+	skybox->Render(viewProjection, ambientLight, lightDirection, camera.Transformation.Position, true);
 }
 
 void Scene::Render(Window& window)
@@ -106,11 +107,14 @@ void Scene::Render(Window& window)
 	cameraRotation.z = -cameraRotation.z;
 
 	refractionFrame->Bind();
-	RenderEntities(mainCamera, true, glm::vec4(0, -1, 0, waterHeight));
+	RenderEntities(mainCamera, true, glm::vec4(0, -1, 0, waterHeight + 0.1f));
 
 	window.BindFrameBuffer();
 	RenderEntities(mainCamera, false);
 
-	water->Render(mainCamera.GetViewProjection(), ambientLight, lightDirection);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	water->Render(mainCamera.GetViewProjection(), ambientLight, lightDirection, mainCamera.Transformation.Position);
+	glDisable(GL_BLEND);
 }
 

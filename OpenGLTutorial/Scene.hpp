@@ -29,7 +29,7 @@ private:
 	glm::vec3 ambientLight;
 	glm::vec3 lightDirection;
 
-	float x;
+	float* waterOffset;
 
 	std::shared_ptr<Entity> CreateEntity(
 		const Transformation& transformation,

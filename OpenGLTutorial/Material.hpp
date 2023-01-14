@@ -59,20 +59,63 @@ class WaterMaterial : public Material
 {
 public:
 	WaterMaterial(std::shared_ptr<Texture> reflection,
-				  std::shared_ptr<Texture> refraction) :
+				  std::shared_ptr<Texture> refraction,
+				  std::shared_ptr<Texture> depthMap,
+				  std::shared_ptr<Texture> dudvMap,
+				  std::shared_ptr<Texture> normalMap,
+				  const glm::vec2& tilingFactor = glm::vec2(1),
+				  float waveStrength = 0.04f,
+				  float specularIntensity = 1.0f,
+				  float specularPower = 8.0f) :
 		Material(Shader::Load("Water_VS.glsl", "Water_FS.glsl")),
 		Reflection(reflection),
-		Refraction(refraction) {}
+		Refraction(refraction),
+		DepthMap(depthMap),
+		DUDVMap(dudvMap),
+		NormalMap(normalMap),
+		TilingFactor(tilingFactor),
+		WaveStrength(waveStrength),
+		SpecularIntensity(specularIntensity),
+		SpecularPower(specularPower),
+		Offset(0) {}
 
 	std::shared_ptr<Texture> Reflection;
 	std::shared_ptr<Texture> Refraction;
+	std::shared_ptr<Texture> DepthMap;
+
+	std::shared_ptr<Texture> DUDVMap;
+	std::shared_ptr<Texture> NormalMap;
+
+	glm::vec2 TilingFactor;
+
+	float WaveStrength;
+	float Offset;
+
+	float SpecularIntensity;
+	float SpecularPower;
 
 	virtual void UpdateUniforms() override
 	{
 		Reflection->Bind(0);
 		Refraction->Bind(1);
+		DepthMap->Bind(4);
+
+		DUDVMap->Bind(2);
+		NormalMap->Bind(3);
 
 		Shader->SetUniform("u_reflection", 0);
 		Shader->SetUniform("u_refraction", 1);
+		Shader->SetUniform("u_depthMap", 4);
+
+		Shader->SetUniform("u_dudvMap", 2);
+		Shader->SetUniform("u_normalMap", 3);
+
+		Shader->SetUniform("u_tilingFactor", TilingFactor);
+
+		Shader->SetUniform("u_waveStrength", WaveStrength);
+		Shader->SetUniform("u_offset", Offset);
+
+		Shader->SetUniform("u_specularIntensity", SpecularIntensity);
+		Shader->SetUniform("u_specularPower", SpecularPower);
 	}
 };

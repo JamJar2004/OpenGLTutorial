@@ -18,6 +18,7 @@ public:
 	void Render(const glm::mat4& viewProjection, 
 				const glm::vec3& ambientLight, 
 				const glm::vec3& lightDirection,
+				const glm::vec3& cameraPosition,
 				bool renderInside = false,
 				bool clipping = false,
 				const glm::vec4& clippingPlane = glm::vec4())
@@ -41,6 +42,7 @@ public:
 		shader->SetUniform("u_WVP", viewProjection * worldMatrix);
 		shader->SetUniform("u_ambientLight", ambientLight);
 		shader->SetUniform("u_lightDirection", lightDirection);
+		shader->SetUniform("u_cameraPosition", cameraPosition);
 		shader->SetUniform("u_clippingPlane", clippingPlane);
 		Material->UpdateUniforms();
 		Mesh->Draw();
