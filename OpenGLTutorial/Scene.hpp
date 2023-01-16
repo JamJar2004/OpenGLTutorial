@@ -24,7 +24,12 @@ private:
 	std::shared_ptr<FrameBuffer> reflectionFrame;
 	std::shared_ptr<FrameBuffer> refractionFrame;
 
+	std::shared_ptr<FrameBuffer> shadowFrame;
+
+	std::shared_ptr<Shader> shadowMapShader;
+
 	Camera mainCamera;
+	Camera altCamera;
 
 	glm::vec3 ambientLight;
 	glm::vec3 lightDirection;
@@ -46,7 +51,7 @@ public:
 
 	void Update(float delta, KeyboardDevice& keyboard, MouseDevice& mouse);
 
-	void RenderEntities(Camera& camera, bool clipping, const glm::vec4& clippingPlane = glm::vec4());
+	void RenderEntities(Camera& camera, const glm::mat4& lightMatrix, std::shared_ptr<Shader> altShader, bool clipping, const glm::vec4& clippingPlane = glm::vec4());
 
 	void Render(Window& window);
 };

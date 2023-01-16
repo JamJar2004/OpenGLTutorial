@@ -15,7 +15,9 @@ public:
 	std::shared_ptr<Mesh>     Mesh;
 	std::shared_ptr<Material> Material;
 
-	void Render(const glm::mat4& viewProjection, 
+	void Render(std::shared_ptr<Shader> altShader,
+				const glm::mat4& lightMatrix,
+				const glm::mat4& viewProjection, 
 				const glm::vec3& ambientLight, 
 				const glm::vec3& lightDirection,
 				const glm::vec3& cameraPosition,
@@ -34,17 +36,28 @@ public:
 		else
 			glDisable(GL_CLIP_DISTANCE0);
 
-		std::shared_ptr<Shader> shader = Material->Shader;
-		shader->Bind();
-
 		glm::mat4 worldMatrix = Transformation.ToMatrix();
-		shader->SetUniform("u_world", worldMatrix);
+
+		std::shared_ptr<Shader> shader = altShader;
+		if(!shader)
+		{
+			shader = Material->Shader;
+			shader->Bind();
+
+			shader->SetUniform("u_world", worldMatrix);
+			shader->SetUniform("u_ambientLight", ambientLight);
+			shader->SetUniform("u_lightDirection", lightDirection);
+			shader->SetUniform("u_cameraPosition", cameraPosition);
+			shader->SetUniform("u_clippingPlane", clippingPlane);
+			shader->SetUniform("u_lightMatrix", lightMatrix);
+
+			Material->UpdateUniforms();
+		}
+		else
+			shader->Bind();
+		
 		shader->SetUniform("u_WVP", viewProjection * worldMatrix);
-		shader->SetUniform("u_ambientLight", ambientLight);
-		shader->SetUniform("u_lightDirection", lightDirection);
-		shader->SetUniform("u_cameraPosition", cameraPosition);
-		shader->SetUniform("u_clippingPlane", clippingPlane);
-		Material->UpdateUniforms();
+
 		Mesh->Draw();
 	}
 };

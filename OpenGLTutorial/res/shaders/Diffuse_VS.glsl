@@ -7,15 +7,19 @@ layout(location = 3) in vec3 a_tangent;
 
 out vec2 v_texCoord;
 out mat3 v_tbnMatrix;
+out vec4 v_shadowMapCoords;
 
 uniform mat4 u_world;
 uniform mat4 u_WVP;
+
+uniform mat4 u_lightMatrix;
 
 uniform vec4 u_clippingPlane;
 
 void main()
 {
 	vec4 worldPosition = u_world * vec4(a_position, 1.0);
+	v_shadowMapCoords = u_lightMatrix * worldPosition;
 	
 	gl_ClipDistance[0] = dot(u_clippingPlane, worldPosition);
 

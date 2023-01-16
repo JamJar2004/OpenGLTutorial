@@ -7,14 +7,19 @@ float randf()
 
 Scene::Scene(const Window& window) :
 	mainCamera(Transformation(glm::vec3(0, 2, 0)), glm::perspective(glm::radians(70.0f), window.Width / float(window.Height), 0.1f, 1000.0f)),
+	altCamera(Transformation(), glm::ortho(-40.0f, 40.0f, -40.0f, 40.0f, -40.0f, 40.0f)),
 	lightDirection(glm::vec3(1, -1, -1)),
 	ambientLight(glm::vec3(0.2f))
 {
 	reflectionFrame = std::make_shared<FrameBuffer>(1024, 1024, true, false, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	refractionFrame = std::make_shared<FrameBuffer>(1024, 1024, true, true, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-	std::shared_ptr<Material> material1 = std::make_shared<DiffuseMaterial>(Texture::Load("bricks.png"), Texture::Load("bricks normal.png"), glm::vec3(1), glm::vec2(20));
-	std::shared_ptr<Material> material2 = std::make_shared<DiffuseMaterial>(Texture::Load("blank.png"), Texture::Load("blank normal.png"), glm::vec3(0.5f, 0.0f, 1.0f));
+	shadowFrame = std::make_shared<FrameBuffer>(1024, 1024, false, true, GL_NEAREST, GL_CLAMP_TO_EDGE);
+
+	shadowMapShader = Shader::Load("ShadowMapShader_VS.glsl", "ShadowMapShader_FS.glsl");
+
+	std::shared_ptr<Material> material1 = std::make_shared<DiffuseMaterial>(Texture::Load("bricks.png"), Texture::Load("bricks normal.png"), shadowFrame->GetDepthAttachment(), glm::vec3(1), glm::vec2(20));
+	std::shared_ptr<Material> material2 = std::make_shared<DiffuseMaterial>(Texture::Load("blank.png"), Texture::Load("blank normal.png"), shadowFrame->GetDepthAttachment(), glm::vec3(0.5f, 0.0f, 1.0f));
 
 	float terrainSize = 20;
 	CreateEntity(Transformation(glm::vec3(), glm::quat(1, 0, 0, 0), glm::vec3(terrainSize)), Mesh::LoadTerrain("heightMap.png"), material1);
@@ -76,18 +81,23 @@ void Scene::Update(float delta, KeyboardDevice& keyboard, MouseDevice& mouse)
 	skybox->Transformation.Position = mainCamera.Transformation.Position;
 }
 
-void Scene::RenderEntities(Camera& camera, bool clipping, const glm::vec4& clippingPlane)
+void Scene::RenderEntities(Camera& camera, const glm::mat4& lightMatrix, std::shared_ptr<Shader> altShader, bool clipping, const glm::vec4& clippingPlane)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glm::mat4 viewProjection = camera.GetViewProjection();
 	for(std::shared_ptr<Entity> entity : entities)
-		entity->Render(viewProjection, ambientLight, lightDirection, camera.Transformation.Position, false, clipping, clippingPlane);
+		entity->Render(altShader, lightMatrix, viewProjection, ambientLight, lightDirection, camera.Transformation.Position, false, clipping, clippingPlane);
 
-	skybox->Render(viewProjection, ambientLight, lightDirection, camera.Transformation.Position, true);
+	skybox->Render(altShader, lightMatrix, viewProjection, ambientLight, lightDirection, camera.Transformation.Position, true);
 }
 
 void Scene::Render(Window& window)
 {
+	altCamera.Transformation.Rotation = glm::quatLookAt(lightDirection, glm::vec3(0, 1, 0));
+	glm::mat4 lightMatrix = altCamera.GetViewProjection();
+	shadowFrame->Bind();
+	RenderEntities(altCamera, lightMatrix, shadowMapShader, false);
+
 	float waterHeight = water->Transformation.Position.y;
 
 	glm::vec3& cameraPosition = mainCamera.Transformation.Position;
@@ -100,21 +110,21 @@ void Scene::Render(Window& window)
 	cameraRotation.z = -cameraRotation.z;
 
 	reflectionFrame->Bind();
-	RenderEntities(mainCamera, true, glm::vec4(0, 1, 0, -waterHeight));
+	RenderEntities(mainCamera, lightMatrix, nullptr, true, glm::vec4(0, 1, 0, -waterHeight));
 
 	cameraPosition.y += distance * 2;
 	cameraRotation.x = -cameraRotation.x;
 	cameraRotation.z = -cameraRotation.z;
 
 	refractionFrame->Bind();
-	RenderEntities(mainCamera, true, glm::vec4(0, -1, 0, waterHeight + 0.1f));
+	RenderEntities(mainCamera, lightMatrix, nullptr, true, glm::vec4(0, -1, 0, waterHeight + 0.1f));
 
 	window.BindFrameBuffer();
-	RenderEntities(mainCamera, false);
+	RenderEntities(mainCamera, lightMatrix, nullptr, false);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	water->Render(mainCamera.GetViewProjection(), ambientLight, lightDirection, mainCamera.Transformation.Position);
+	water->Render(nullptr, lightMatrix, mainCamera.GetViewProjection(), ambientLight, lightDirection, mainCamera.Transformation.Position);
 	glDisable(GL_BLEND);
 }
 
