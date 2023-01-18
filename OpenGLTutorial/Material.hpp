@@ -39,6 +39,7 @@ public:
 		Shader->SetUniform("u_shadowMap", 2);
 		Shader->SetUniform("u_color", Color);
 		Shader->SetUniform("u_tilingFactor", TilingFactor);
+		Shader->SetUniform("u_shadowMapSize", glm::vec2(ShadowMap->Width, ShadowMap->Height));
 	}
 };
 

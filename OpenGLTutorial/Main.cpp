@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 {
     if(SDL_Init(SDL_INIT_EVERYTHING) == 0)
     {
-        Window window(800, 600, "Test");
+        Window window(1920, 1080, "Test");
 
 		MouseDevice mouse(&window);
 		KeyboardDevice keyboard;
